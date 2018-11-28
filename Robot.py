@@ -48,7 +48,12 @@ class Robot(object):
             self.epsilon = 0
         else:
             # TODO 2. Update parameters when learning
-            self.epsilon =self.epsilon0
+            self.epsilon =self.epsilon0**self.t
+            self.t += 0.05
+            #if self.t <= 600:
+            #    self.epsilon =self.epsilon0
+            #elif self.t > 600:
+            #    self.epsilon=self.epsilon0*(1-(self.t-500)/self.t)
 
         return self.epsilon
 
@@ -69,17 +74,13 @@ class Robot(object):
         # Qtable[state] ={'u':xx, 'd':xx, ...}
         # If Qtable[state] already exits, then do
         # not change it.
-        ini_table = {'u':0,'d':0,'r':0,'l':0}
+        ini_table = {'u':0.,'d':0.,'r':0.,'l':0.}
         
         dicts = []
         # Qtable={}
-        
-        for i in range(self.length):
-            for j in range(self.width):
-                dicts.append((i,j))
-        for item in dicts:
-            if item not in self.Qtable:
-                self.Qtable[item]=ini_table
+        if state not in self.Qtable:
+            self.Qtable[state]=ini_table
+
 
     def choose_action(self):
         """
@@ -121,15 +122,15 @@ class Robot(object):
         """
         if self.learning:
             
-            current_state = self.sense_state()
+            Old_Q = self.Qtable[self.state][action]           
+
+            #qline=self.Qtable[next_state]
             
-            Old_Q = self.Qtable[current_state][action]
+            #next_action = max(qline,key=qline.get)
             
-            self.maze.move_robot(action)
+            maxQ_next=max(self.Qtable[next_state].values())
             
-            next_action = self.choose_action()
-            
-            self.Qtable[current_state][action]=(1-self.alpha)*Old_Q+self.alpha*(r+self.gamma*self.Qtable[next_state][next_action])
+            self.Qtable[self.state][action]=(1-self.alpha)*Old_Q+self.alpha*(r+self.gamma*maxQ_next)
             # TODO 8. When learning, update the q table according
             # to the given rules
 
